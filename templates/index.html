@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL验证器</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        input[type="url"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .message {
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+        }
+        .error {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        .success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>URL验证器</h1>
+        <div class="input-group">
+            <input type="url" id="urlInput" placeholder="请输入URL（例如：https://www.example.com）" required>
+            <button onclick="validateURL()">验证并跳转</button>
+        </div>
+        <div id="message"></div>
+    </div>
+
+    <script>
+        function validateURL() {
+            const urlInput = document.getElementById('urlInput');
+            const messageDiv = document.getElementById('message');
+            const url = urlInput.value;
+
+            if (!url) {
+                showMessage('请输入URL', false);
+                return;
+            }
+
+            // 发送到服务器验证
+            fetch('/validate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `url=${encodeURIComponent(url)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.valid) {
+                    showMessage('URL有效，正在跳转...', true);
+                    setTimeout(() => {
+                        window.location.href = url;
+                    }, 1500);
+                } else {
+                    showMessage(data.message, false);
+                }
+            })
+            .catch(error => {
+                showMessage('验证过程中出现错误', false);
+            });
+        }
+
+        function showMessage(text, isSuccess) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = text;
+            messageDiv.className = `message ${isSuccess ? 'success' : 'error'}`;
+        }
+    </script>
+</body>
+</html>
